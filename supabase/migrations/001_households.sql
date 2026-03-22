@@ -1,9 +1,7 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE TABLE public.households (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  invite_code TEXT UNIQUE DEFAULT encode(gen_random_bytes(6), 'hex'),
+  invite_code TEXT UNIQUE DEFAULT substring(replace(gen_random_uuid()::text, '-', ''), 1, 8),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
