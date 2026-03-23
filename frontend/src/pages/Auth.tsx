@@ -12,7 +12,6 @@ export function Auth() {
   const [inviteCode, setInviteCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -58,7 +57,8 @@ export function Auth() {
     // Create default savings fund
     await supabase.from('savings_fund').insert({ household_id: hh.id, total_balance: 0 })
 
-    setMessage('¡Cuenta creada! Revisa tu email o ya puedes ingresar.')
+    // Re-login after household is created so onAuthStateChange fires with household in DB
+    await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
   }
 
@@ -100,7 +100,8 @@ export function Auth() {
       return
     }
 
-    setMessage(`¡Te uniste a "${hh.name}"! Ya puedes ingresar.`)
+    // Re-login after joining so onAuthStateChange fires with household in DB
+    await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
   }
 
@@ -113,17 +114,11 @@ export function Auth() {
           <p className="text-slate-400 text-sm mt-1">Gestión financiera del hogar</p>
         </div>
 
-        {message && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm mb-4">
-            {message}
-          </div>
-        )}
-
         <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-6">
           {(['login', 'register', 'join'] as Mode[]).map((m) => (
             <button
               key={m}
-              onClick={() => { setMode(m); setError(''); setMessage('') }}
+              onClick={() => { setMode(m); setError('') }}
               className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 mode === m ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
